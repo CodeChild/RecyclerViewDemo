@@ -17,8 +17,11 @@ import java.util.List;
  */
 
 public class MyAdapter extends RecyclerView.Adapter {
+    public final static int ITEM_TYPE_HEADER = 0;
+    public final static int ITEM_TYPE_TEXT = 1;
     private List<String> mDataSet = new ArrayList<>();
     private Context mContext;
+
     public MyAdapter(Context context) {
         mContext = context;
     }
@@ -26,22 +29,27 @@ public class MyAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView;
-        itemView = LayoutInflater.from(mContext).inflate(R.layout.item_layout, parent, false);
-        return new MyViewHolder(itemView);
+        if (viewType == ITEM_TYPE_HEADER) {
+            itemView = LayoutInflater.from(mContext).inflate(R.layout.item_header, parent, false);
+            return new HeaderViewHolder(itemView);
+        } else {
+            itemView = LayoutInflater.from(mContext).inflate(R.layout.item_layout, parent, false);
+            return new TextViewHolder(itemView);
+        }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        MyViewHolder mHolder = (MyViewHolder) holder;
-        mHolder.textView.setText(mDataSet.get(position));
+        if (holder instanceof HeaderViewHolder)
+            ((HeaderViewHolder) holder).imageView.setImageResource(R.drawable.logo);
+        else
+            ((TextViewHolder) holder).textView.setText(mDataSet.get(position-1));
     }
 
     @Override
     public int getItemCount() {
         return mDataSet.size();
     }
-
-
 
 
     public void refreshItems(List<String> items) {
@@ -56,13 +64,15 @@ public class MyAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        return position == 0 ? ITEM_TYPE_HEADER : ITEM_TYPE_TEXT;
+    }
 
-
-
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public class TextViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
 
-        public MyViewHolder(View itemView) {
+        public TextViewHolder(View itemView) {
             super(itemView);
             textView = (TextView) itemView.findViewById(R.id.tv_text);
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -71,6 +81,13 @@ public class MyAdapter extends RecyclerView.Adapter {
                     Toast.makeText(mContext, "第" + (getLayoutPosition() + 1) + "项被选中", Toast.LENGTH_SHORT).show();
                 }
             });
+        }
+    }
+    public class HeaderViewHolder extends RecyclerView.ViewHolder{
+        ImageView imageView;
+        public HeaderViewHolder(View itemView) {
+            super(itemView);
+            imageView=(ImageView) itemView.findViewById(R.id.iv_image);
         }
     }
 }
